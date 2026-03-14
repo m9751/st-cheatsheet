@@ -8,11 +8,21 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; padding: 20px; max-width: 1000px; margin: 0 auto; }
   h1 { font-size: 1.6rem; margin-bottom: 4px; color: #fff; }
-  .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 24px; }
+  .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 16px; }
   .live-dot { display: inline-block; width: 8px; height: 8px; background: #22c55e; border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid #333; }
+  .tab { padding: 10px 20px; cursor: pointer; color: #888; font-weight: 600; font-size: 0.85rem; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .tab:hover { color: #ccc; }
+  .tab.active { color: #f97316; border-bottom-color: #f97316; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Commands tab */
   .category { margin-bottom: 24px; }
-  .category-header { font-size: 1.1rem; font-weight: 700; color: #f97316; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #333; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem; }
+  .category-header { font-weight: 700; color: #f97316; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #333; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem; }
   .cmd-row { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; transition: background 0.15s; }
   .cmd-row:hover { background: #1a1a2e; }
   .cmd-title { font-weight: 600; color: #fff; min-width: 180px; flex-shrink: 0; }
@@ -29,19 +39,174 @@
   .type-script { background: #3d2e1a; color: #fbbf24; }
   .type-function { background: #3d1a3d; color: #e879f9; }
   .type-config { background: #2a2a2a; color: #999; }
-  .type-memo { background: #2a2a1a; color: #d4a; }
+  .type-memo { background: #2a2a1a; color: #da4; }
   .type-spreadsheet { background: #1a2a3a; color: #7dd3fc; }
+  .type-proposal { background: #2a1a3a; color: #c084fc; }
+  .type-report { background: #1a3a2a; color: #86efac; }
+  .type-battlecard { background: #3a1a1a; color: #fca5a5; }
+
+  /* Recovery tab */
+  .recovery-section { margin-bottom: 28px; }
+  .recovery-section h3 { color: #f97316; margin-bottom: 8px; font-size: 0.95rem; }
+  .recovery-section p { color: #aaa; font-size: 0.85rem; line-height: 1.5; margin-bottom: 8px; }
+  .recovery-code { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 12px 16px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem; color: #4ade80; overflow-x: auto; margin-bottom: 8px; position: relative; white-space: pre; line-height: 1.6; }
+  .copy-btn { position: absolute; top: 8px; right: 8px; background: #333; border: none; color: #aaa; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+  .copy-btn:hover { background: #555; color: #fff; }
+  .recovery-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .recovery-table th { text-align: left; color: #f97316; font-size: 0.75rem; text-transform: uppercase; padding: 6px 12px; border-bottom: 1px solid #333; }
+  .recovery-table td { padding: 6px 12px; font-size: 0.82rem; border-bottom: 1px solid #1a1a1a; }
+  .recovery-table td:first-child { color: #fff; font-weight: 600; }
+  .recovery-table td:nth-child(2) { color: #aaa; }
+  .recovery-table td:nth-child(3) { color: #4ade80; font-family: monospace; font-size: 0.75rem; }
+  .warning { background: #2a1a0a; border: 1px solid #f97316; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+  .warning-title { color: #f97316; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+  .warning p { color: #ccc; font-size: 0.82rem; margin: 0; }
+
   .updated { color: #555; font-size: 0.7rem; text-align: right; margin-top: 20px; }
 </style>
 </head>
 <body>
 
-<h1><span class="live-dot"></span>SmokinTerritory Command Cheat Sheet</h1>
+<h1><span class="live-dot"></span>SmokinTerritory</h1>
 <p class="subtitle">Live from Supabase — auto-updates as new commands are added</p>
 
-<input type="text" class="search-box" placeholder="Search commands... (e.g. proposal, research, WARN)" id="search">
-<div class="count" id="count"></div>
-<div id="content"><div class="loading">Loading from Supabase...</div></div>
+<div class="tabs">
+  <div class="tab active" data-tab="commands">Command Cheat Sheet</div>
+  <div class="tab" data-tab="recovery">Disaster Recovery</div>
+</div>
+
+<!-- COMMANDS TAB -->
+<div class="tab-content active" id="tab-commands">
+  <input type="text" class="search-box" placeholder="Search commands... (e.g. proposal, research, WARN)" id="search">
+  <div class="count" id="count"></div>
+  <div id="content"><div class="loading">Loading from Supabase...</div></div>
+</div>
+
+<!-- RECOVERY TAB -->
+<div class="tab-content" id="tab-recovery">
+
+  <div class="warning">
+    <div class="warning-title">⚠️ If you're reading this, something went wrong.</div>
+    <p>Follow these steps in order. Everything is recoverable — your data lives in Supabase and GitHub, not on any single machine.</p>
+  </div>
+
+  <div class="recovery-section">
+    <h3>Step 1 — What lives where</h3>
+    <table class="recovery-table">
+      <tr><th>Asset</th><th>Location</th><th>Access</th></tr>
+      <tr><td>Territory data (865 accounts, scoring, signals)</td><td>Supabase</td><td>cnplogkxbjecdeeritdl</td></tr>
+      <tr><td>Claude config (CLAUDE.md, memory, skills, settings)</td><td>GitHub (private)</td><td>m9751/claude-config</td></tr>
+      <tr><td>Territory dashboard + heatmap</td><td>Vercel + GitHub</td><td>m9751/smokin-territory</td></tr>
+      <tr><td>This cheat sheet</td><td>GitHub Pages</td><td>m9751/st-cheatsheet</td></tr>
+      <tr><td>Deliverables registry</td><td>Supabase</td><td>public.deliverables</td></tr>
+      <tr><td>Account artifacts</td><td>Supabase</td><td>public.account_artifacts</td></tr>
+      <tr><td>WARN pipeline</td><td>GitHub</td><td>m9751/warn-pipeline</td></tr>
+      <tr><td>SAM UEI resolver</td><td>GitHub</td><td>m9751/sam-uei-resolver</td></tr>
+    </table>
+  </div>
+
+  <div class="recovery-section">
+    <h3>Step 2 — Restore Claude config to a new machine</h3>
+    <p>This restores all memory files, skills, settings, and CLAUDE.md.</p>
+    <div class="recovery-code">
+# Install Claude Code (if not already installed)
+npm install -g @anthropic-ai/claude-code
+
+# Clone the config backup
+gh repo clone m9751/claude-config ~/claude-config-restore
+
+# Copy into Claude's config directories
+mkdir -p ~/.claude/projects/-Users-$(whoami)/memory
+mkdir -p ~/.claude/skills
+cp ~/claude-config-restore/CLAUDE.md ~/.claude/projects/-Users-$(whoami)/
+cp -R ~/claude-config-restore/memory/* ~/.claude/projects/-Users-$(whoami)/memory/
+cp -R ~/claude-config-restore/skills/* ~/.claude/skills/
+cp ~/claude-config-restore/settings.json ~/.claude/settings.json
+
+# Verify
+ls ~/.claude/projects/-Users-$(whoami)/CLAUDE.md
+ls ~/.claude/projects/-Users-$(whoami)/memory/
+ls ~/.claude/skills/
+    </div>
+  </div>
+
+  <div class="recovery-section">
+    <h3>Step 3 — Reconnect MCP servers</h3>
+    <p>Claude Code MCP connections are stored in <code>~/.claude/settings.json</code> (restored above). Verify these are active:</p>
+    <table class="recovery-table">
+      <tr><th>MCP Server</th><th>Purpose</th><th>Verify with</th></tr>
+      <tr><td>Supabase</td><td>Database (primary)</td><td>"run a count on accounts"</td></tr>
+      <tr><td>ZoomInfo</td><td>Contact enrichment</td><td>"search contacts at Jefferson Health"</td></tr>
+      <tr><td>NPI</td><td>Provider validation</td><td>"npi lookup 1234567890"</td></tr>
+      <tr><td>CMS/Medicare</td><td>Coverage data</td><td>"search national coverage"</td></tr>
+      <tr><td>Vercel</td><td>Dashboard deploy</td><td>"list deployments"</td></tr>
+    </table>
+  </div>
+
+  <div class="recovery-section">
+    <h3>Step 4 — Verify data integrity</h3>
+    <p>Open Claude Code and say:</p>
+    <div class="recovery-code">"integrity run"</div>
+    <p>This triggers the db-integrity skill which checks table counts, orphan records, scoring gaps, and RLS policies. If it reports issues, Claude will fix them.</p>
+  </div>
+
+  <div class="recovery-section">
+    <h3>Step 5 — Restore Regular Claude (claude.ai)</h3>
+    <p>The system instructions are backed up at <code>m9751/claude-config/claude_ai_system_instructions.txt</code>. To restore:</p>
+    <div class="recovery-code">
+1. Open https://claude.ai
+2. Go to Settings > Profile > Custom Instructions
+3. Paste the contents of claude_ai_system_instructions.txt
+4. Save
+    </div>
+  </div>
+
+  <div class="recovery-section">
+    <h3>Step 6 — If GitHub access is lost</h3>
+    <p>All territory data, scoring, signals, deliverables, and artifacts live in Supabase — not GitHub. GitHub holds config and deploy pipelines. If GitHub is gone:</p>
+    <div class="recovery-code">
+# Supabase is the source of truth for data
+# Access directly at: https://supabase.com/dashboard/project/cnplogkxbjecdeeritdl
+
+# Rebuild config manually:
+# 1. Open Claude Code
+# 2. Say: "I lost my config. Query the deliverables table and rebuild CLAUDE.md from the schema"
+# 3. Claude can reconstruct CLAUDE.md by querying Supabase metadata
+
+# Rebuild this cheat sheet:
+# 1. Say: "rebuild the command cheat sheet from deliverables table"
+# 2. Claude will generate the HTML and redeploy
+    </div>
+  </div>
+
+  <div class="recovery-section">
+    <h3>Step 7 — If Supabase access is lost</h3>
+    <p>This is the worst case. Supabase holds all 865 accounts, scoring data, and signal history.</p>
+    <div class="recovery-code">
+# Supabase has automatic daily backups (Pro plan)
+# Contact Supabase support to restore from backup
+# Project ID: cnplogkxbjecdeeritdl
+# Region: us-west-2
+
+# If project is unrecoverable:
+# 1. Create new Supabase project
+# 2. Apply migrations from m9751/smokin-territory (if GitHub is intact)
+# 3. Reload data from Salesforce export + CMS downloads
+# 4. Re-run scoring: SELECT public.run_scoring_v4_1();
+# 5. Update all config files with new project ID and anon key
+    </div>
+  </div>
+
+  <div class="recovery-section">
+    <h3>Recovery command for Claude Code</h3>
+    <p>If you're in a fresh Claude Code session and need to bootstrap everything, say:</p>
+    <div class="recovery-code" style="color: #a78bfa; font-size: 0.9rem;">
+"full recovery — restore config from m9751/claude-config and verify all connections"
+    </div>
+  </div>
+
+</div>
+
 <div class="updated" id="updated"></div>
 
 <script>
@@ -63,6 +228,16 @@ const CATEGORY_LABELS = {
 };
 
 let allData = [];
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
 
 async function load() {
   const res = await fetch(
@@ -90,7 +265,7 @@ function render(data) {
       const phrases = d.trigger_phrase.split(',').map(p => `"${p.trim()}"`).join('  ·  ');
       const badge = `<span class="type-badge type-${d.type}">${d.type}</span>`;
       const link = d.url ? ` → <a href="${d.url}" style="color:#60a5fa" target="_blank">${d.url}</a>` : '';
-      html += `<div class="cmd-row" data-search="${(d.title + ' ' + d.trigger_phrase + ' ' + d.description).toLowerCase()}">
+      html += `<div class="cmd-row">
         <div>
           <div class="cmd-title">${d.title}${badge}</div>
           <div class="cmd-desc">${d.description || ''}${link}</div>
