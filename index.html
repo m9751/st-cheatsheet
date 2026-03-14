@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmokinTerritory — Command Cheat Sheet</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; padding: 20px; max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin-bottom: 4px; color: #fff; }
+  .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 24px; }
+  .live-dot { display: inline-block; width: 8px; height: 8px; background: #22c55e; border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .category { margin-bottom: 24px; }
+  .category-header { font-size: 1.1rem; font-weight: 700; color: #f97316; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #333; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem; }
+  .cmd-row { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; transition: background 0.15s; }
+  .cmd-row:hover { background: #1a1a2e; }
+  .cmd-title { font-weight: 600; color: #fff; min-width: 180px; flex-shrink: 0; }
+  .cmd-phrases { color: #a78bfa; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82rem; }
+  .cmd-desc { color: #888; font-size: 0.78rem; margin-top: 2px; }
+  .search-box { width: 100%; padding: 10px 14px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 0.95rem; margin-bottom: 20px; outline: none; }
+  .search-box:focus { border-color: #f97316; }
+  .search-box::placeholder { color: #666; }
+  .loading { text-align: center; padding: 40px; color: #666; }
+  .count { color: #666; font-size: 0.75rem; margin-bottom: 16px; }
+  .type-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.65rem; font-weight: 600; margin-left: 8px; text-transform: uppercase; }
+  .type-skill { background: #1e3a5f; color: #60a5fa; }
+  .type-dashboard { background: #1a3d2e; color: #4ade80; }
+  .type-script { background: #3d2e1a; color: #fbbf24; }
+  .type-function { background: #3d1a3d; color: #e879f9; }
+  .type-config { background: #2a2a2a; color: #999; }
+  .type-memo { background: #2a2a1a; color: #d4a; }
+  .type-spreadsheet { background: #1a2a3a; color: #7dd3fc; }
+  .updated { color: #555; font-size: 0.7rem; text-align: right; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h1><span class="live-dot"></span>SmokinTerritory Command Cheat Sheet</h1>
+<p class="subtitle">Live from Supabase — auto-updates as new commands are added</p>
+
+<input type="text" class="search-box" placeholder="Search commands... (e.g. proposal, research, WARN)" id="search">
+<div class="count" id="count"></div>
+<div id="content"><div class="loading">Loading from Supabase...</div></div>
+<div class="updated" id="updated"></div>
+
+<script>
+const SUPABASE_URL = 'https://cnplogkxbjecdeeritdl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNucGxvZ2t4YmplY2RlZXJpdGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMjAzMTUsImV4cCI6MjA4Nzg5NjMxNX0.WJ6edMljHiY-fku9G2OWm83y5wHWI5yZHvxtpYMCuWU';
+
+const CATEGORY_ORDER = ['signals', 'outbound', 'research', 'proposals', 'scoring', 'pipeline', 'find', 'schedule', 'infra', 'general'];
+const CATEGORY_LABELS = {
+  signals: '📡 Signals & Briefings',
+  outbound: '📧 Outbound & Campaigns',
+  research: '🔍 Research & Prep',
+  proposals: '📄 Proposals & Assets',
+  scoring: '📊 Scoring & Territory',
+  pipeline: '🔧 Pipelines & Tools',
+  find: '🗂️ Find Things',
+  schedule: '⏰ Schedule & Automate',
+  infra: '⚙️ Infrastructure',
+  general: '📦 General'
+};
+
+let allData = [];
+
+async function load() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/deliverables?select=title,type,trigger_phrase,category,description,url,location&trigger_phrase=not.is.null&order=category,title`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+  );
+  allData = await res.json();
+  render(allData);
+  document.getElementById('updated').textContent = `Last loaded: ${new Date().toLocaleString()}`;
+}
+
+function render(data) {
+  const grouped = {};
+  data.forEach(d => {
+    const cat = d.category || 'general';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(d);
+  });
+
+  let html = '';
+  CATEGORY_ORDER.forEach(cat => {
+    if (!grouped[cat] || grouped[cat].length === 0) return;
+    html += `<div class="category"><div class="category-header">${CATEGORY_LABELS[cat] || cat}</div>`;
+    grouped[cat].forEach(d => {
+      const phrases = d.trigger_phrase.split(',').map(p => `"${p.trim()}"`).join('  ·  ');
+      const badge = `<span class="type-badge type-${d.type}">${d.type}</span>`;
+      const link = d.url ? ` → <a href="${d.url}" style="color:#60a5fa" target="_blank">${d.url}</a>` : '';
+      html += `<div class="cmd-row" data-search="${(d.title + ' ' + d.trigger_phrase + ' ' + d.description).toLowerCase()}">
+        <div>
+          <div class="cmd-title">${d.title}${badge}</div>
+          <div class="cmd-desc">${d.description || ''}${link}</div>
+        </div>
+        <div class="cmd-phrases">${phrases}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('content').innerHTML = html;
+  document.getElementById('count').textContent = `${data.length} commands loaded`;
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  if (!q) { render(allData); return; }
+  const filtered = allData.filter(d =>
+    (d.title + ' ' + d.trigger_phrase + ' ' + d.description + ' ' + d.category).toLowerCase().includes(q)
+  );
+  render(filtered);
+  document.getElementById('count').textContent = `${filtered.length} of ${allData.length} commands`;
+});
+
+load();
+</script>
+</body>
+</html>
